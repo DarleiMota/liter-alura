@@ -15,11 +15,17 @@ public class Book {
     @Column(name = "download_count")
     private Integer downloadCount;
 
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "author_id")
+    private Author author;
+
+
     public Book(){}
 
-    public Book(String title, Integer downloadCount) {
+    public Book(String title, Integer downloadCount, Author author) {
         this.title = title;
         this.downloadCount = downloadCount;
+        this.author = author;
     }
 
     public long getId() {
@@ -49,9 +55,10 @@ public class Book {
     @Override
     public String toString() {
         return "Book{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
+                "title='" + title + '\'' +
                 ", downloadCount=" + downloadCount +
+                ", author=" + author +
                 '}';
     }
 }
+
