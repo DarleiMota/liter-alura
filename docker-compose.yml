@@ -1,0 +1,22 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16
+    container_name: literalura_db
+    environment:
+      POSTGRES_USER: alura
+      POSTGRES_PASSWORD: alura123
+      POSTGRES_DB: literalura
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - backend
+
+volumes:
+  pgdata:
+
+networks:
+  backend:
