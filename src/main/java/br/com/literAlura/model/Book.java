@@ -19,14 +19,17 @@ public class Book {
     @JoinColumn(name = "author_id")
     private Author author;
 
+    @Column(name = "language")
+    private String language;
 
     public Book() {
     }
 
-    public Book(String title, Integer downloadCount, Author author) {
+    public Book(String title, Integer downloadCount, Author author, String language) {
         this.title = title;
         this.downloadCount = downloadCount;
         this.author = author;
+        this.language = language;
     }
 
     public long getId() {
@@ -53,12 +56,30 @@ public class Book {
         this.downloadCount = downloadCount;
     }
 
+    public Author getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(Author author) {
+        this.author = author;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
     @Override
     public String toString() {
         return "Book{" +
-                "title='" + title + '\'' +
+                "id=" + id +
+                ", title='" + title + '\'' +
                 ", downloadCount=" + downloadCount +
                 ", author=" + author +
+                ", language='" + language + '\'' +
                 '}';
     }
 }

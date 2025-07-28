@@ -16,7 +16,7 @@ public class LiterAluraApplication {
     @Bean
     CommandLineRunner run(BookService bookService) {
         return args -> {
-            bookService.importarLivros("Frankenstein");
+            bookService.importarLivros("shelley");
         };
     }
 }

@@ -12,10 +12,15 @@ public class BookDTO {
 
     @JsonAlias("download_count")
     private Integer downloadCount;
+    private List<String> languages;
     private List<AuthorDTO> authors;
 
     public String getTitle() {
         return title;
+    }
+
+    public List<String> getLanguages() {
+        return languages;
     }
 
     public Integer getDownloadCount() {
@@ -31,6 +36,7 @@ public class BookDTO {
         return "BookDTO{" +
                 "title='" + title + '\'' +
                 ", downloadCount=" + downloadCount +
+                ", languages=" + languages +
                 ", authors=" + authors +
                 '}';
     }
