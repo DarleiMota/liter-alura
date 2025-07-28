@@ -20,7 +20,8 @@ public class Book {
     private Author author;
 
 
-    public Book(){}
+    public Book() {
+    }
 
     public Book(String title, Integer downloadCount, Author author) {
         this.title = title;

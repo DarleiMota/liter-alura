@@ -12,7 +12,8 @@ public class Author {
     private long id;
     private String name;
 
-    public Author(){}
+    public Author() {
+    }
 
     public Author(String name) {
         this.name = name;
