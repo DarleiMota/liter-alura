@@ -28,13 +28,12 @@ public class GutendexClient {
 
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(json);
-            JsonNode results = root.get("result");
+            JsonNode results = root.get("results");
 
             return List.of(mapper.readValue(results.toString(), BookDTO[].class));
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException("Erro ao buscar dados da API", e);
         }
-
     }
 }
 

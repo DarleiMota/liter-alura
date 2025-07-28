@@ -1,6 +1,8 @@
 package br.com.literAlura.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AuthorDTO {
 
     private String name;

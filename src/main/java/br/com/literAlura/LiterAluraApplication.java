@@ -1,6 +1,6 @@
 package br.com.literAlura;
 
-import br.com.literAlura.cliente.GutendexClient;
+import br.com.literAlura.service.BookService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -14,12 +14,9 @@ public class LiterAluraApplication {
     }
 
     @Bean
-    CommandLineRunner testApi() {
+    CommandLineRunner run(BookService bookService) {
         return args -> {
-            var client = new GutendexClient();
-            var livros = client.buscarLivros("Frankenstein");
-
-            livros.forEach(System.out::println);
+            bookService.importarLivros("Frankenstein");
         };
     }
 }

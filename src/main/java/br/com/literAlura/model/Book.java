@@ -15,7 +15,7 @@ public class Book {
     @Column(name = "download_count")
     private Integer downloadCount;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "author_id")
     private Author author;
 
