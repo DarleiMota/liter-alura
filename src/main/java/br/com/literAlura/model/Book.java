@@ -10,6 +10,8 @@ public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
+    @Column(length = 500) // Aumente para 500 caracteres ou mude para TEXT
     private String title;
 
     @Column(name = "download_count")

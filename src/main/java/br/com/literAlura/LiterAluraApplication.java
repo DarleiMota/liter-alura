@@ -1,6 +1,6 @@
 package br.com.literAlura;
 
-import br.com.literAlura.service.BookService;
+import br.com.literAlura.service.MenuService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -14,9 +14,7 @@ public class LiterAluraApplication {
     }
 
     @Bean
-    CommandLineRunner run(BookService bookService) {
-        return args -> {
-            bookService.importarLivros("shelley");
-        };
+    public CommandLineRunner iniciarMenu(MenuService menuService) {
+        return argumentosDaLinhaDeComando -> menuService.exibirMenu();
     }
 }

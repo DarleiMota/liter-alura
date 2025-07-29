@@ -17,11 +17,13 @@ public class BookController {
         this.bookService = bookService;
     }
 
+    // Lista todos os livros
     @GetMapping
     public List<Book> listarTodos(){
         return bookService.listarTodos();
     }
 
+    // Pesquisa por ID
     @GetMapping("/{id}")
     public Book buscarPorId(@PathVariable Long id) {
         return bookService.buscarPorId(id);

@@ -8,6 +8,7 @@ import br.com.literAlura.model.Book;
 import br.com.literAlura.repository.AuthorRepository;
 import br.com.literAlura.repository.BookRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -15,50 +16,94 @@ import java.util.List;
 public class BookService {
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
-    private final GutendexClient client = new GutendexClient();
+    private final GutendexClient client;
 
-    public BookService(BookRepository bookRepository, AuthorRepository authorRepository) {
+    public BookService(BookRepository bookRepository,
+                       AuthorRepository authorRepository,
+                       GutendexClient client) {
         this.bookRepository = bookRepository;
         this.authorRepository = authorRepository;
+        this.client = client;
     }
 
+    @Transactional
     public void importarLivros(String termo) {
-        List<BookDTO> bookDTOs = client.buscarLivros(termo);
+        if (termo == null || termo.isBlank()) {
+            System.out.println("Erro: Termo de busca vazio");
+            return;
+        }
 
-        for (BookDTO dto : bookDTOs) {
-            if (dto.getAuthors().isEmpty()) continue;
+        System.out.println("\nBuscando livros para: '" + termo + "'...\n");
 
-            AuthorDTO authorDTO = dto.getAuthors().get(0);
-            String authorName = authorDTO.getName();
-            Integer birthYear = authorDTO.getBirthYear();
-            Integer deathYear = authorDTO.getDeathYear();
+        try {
+            List<BookDTO> bookDTOs = client.buscarLivros(termo);
 
-            //Evita Duplicar autores
-            Author author = authorRepository
-                    .findByNameIgnoreCase(authorName)
-                    .orElseGet(()-> authorRepository.save(
-                            new Author(authorName,birthYear,deathYear)
+            if (bookDTOs.isEmpty()) {
+                System.out.println("Nenhum livro encontrado para: '" + termo + "'");
+                return;
+            }
+
+            for (BookDTO dto : bookDTOs) {
+                try {
+                    if (dto.getAuthors().isEmpty() || dto.getAuthors().get(0).getName() == null) {
+                        continue;
+                    }
+
+                    // Processa autor
+                    AuthorDTO authorDTO = dto.getAuthors().get(0);
+                    Author author = authorRepository.findByNameIgnoreCase(authorDTO.getName())
+                            .orElseGet(() -> authorRepository.save(
+                                    new Author(
+                                            authorDTO.getName(),
+                                            authorDTO.getBirthYear(),
+                                            authorDTO.getDeathYear()
+                                    )
+                            ));
+
+                    // Verifica e ajusta título longo
+                    String tituloOriginal = dto.getTitle().length() > 500 ?
+                            dto.getTitle().substring(0, 500) : dto.getTitle();
+
+                    String tituloExibicao = dto.getTitle().length() > 100 ?
+                            dto.getTitle().substring(0, 97) + "..." : dto.getTitle();
+
+                    // Verifica resultados duplicados
+                    if (bookRepository.existsByTitleIgnoreCaseAndAuthor(tituloOriginal, author)) {
+                        continue;
+                    }
+
+                    // Cria livro e verifica livro
+                    Book book = new Book(
+                            tituloOriginal,
+                            dto.getDownloadCount() != null ? dto.getDownloadCount() : 0,
+                            author,
+                            dto.getLanguages().isEmpty() ? "unknown" : dto.getLanguages().get(0)
+                    );
+
+                    bookRepository.save(book);
+
+                    System.out.println("""
+                    --------- LIVRO IMPORTADO ----------
+                    Título: %s
+                    Autor: %s (%d - %s)
+                    Idioma: %s
+                    Downloads: %,d
+                    -------------------------------------
+                    """.formatted(
+                            tituloExibicao,
+                            author.getName(),
+                            author.getBirthYear() != null ? author.getBirthYear() : 0,
+                            author.getDeathYear() != null ? author.getDeathYear() : "Presente",
+                            book.getLanguage(),
+                            book.getDownloadCount()
                     ));
 
-            //Cria o livro com idioma
-            String language = dto.getLanguages().isEmpty() ? "unknown" : dto.getLanguages().get(0);
-
-            Book book = new Book(
-                                dto.getTitle(),
-                                dto.getDownloadCount(),
-                                author,
-                                language);
-
-            bookRepository.save(book);
-
-            System.out.println(
-                    "Livro salvo: " + book.getTitle() +
-                            " | Autor: " + author.getName() +
-                            " | Nascimento: "+ birthYear +
-                            " | Morte: " + deathYear+
-                            " | Idioma: "+ language
-            );
-            System.out.println("DEBUG => AuthorDTO: " + authorName + ", nascimento: " + birthYear + ", morte: " + deathYear);
+                } catch (Exception e) {
+                    // Não mostra erros individuais
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Erro na busca: " + e.getMessage());
         }
     }
 
@@ -71,4 +116,59 @@ public class BookService {
                 .orElseThrow(() -> new RuntimeException("Livro com ID " + id + " não encontrado"));
     }
 
+    public void listarLivrosFormatado() {
+        List<Book> livros = bookRepository.findAll();
+        if (livros.isEmpty()) {
+            System.out.println("\nNenhum livro cadastrado no banco de dados");
+            return;
+        }
+
+        System.out.println("\nLISTA COMPLETA DE LIVROS:\n");
+        livros.forEach(livro -> {
+            System.out.println("""
+                    --------- Livro ----------
+                    Título: %s
+                    Autor: %s (%d - %s)
+                    Idioma: %s
+                    Downloads: %,d
+                    ---------------------------
+                    """.formatted(
+                    livro.getTitle().length() > 100 ? livro.getTitle().substring(0,97) + "..." : livro.getTitle(),
+                    livro.getAuthor().getName(),
+                    livro.getAuthor().getBirthYear() != null ? livro.getAuthor().getBirthYear() : 0,
+                    livro.getAuthor().getDeathYear() != null ? livro.getAuthor().getDeathYear() : "Presente",
+                    livro.getLanguage(),
+                    livro.getDownloadCount()
+            ));
+        });
+        System.out.println("\n Total: " + livros.size() + " livros");
+    }
+
+    public void listarLivrosPorIdioma(String idioma) {
+        List<Book> livros = bookRepository.findAll()
+                .stream()
+                .filter(l -> l.getLanguage().equalsIgnoreCase(idioma))
+                .toList();
+
+        if (livros.isEmpty()) {
+            System.out.println("\nNenhum livro encontrado no idioma: " + idioma);
+            return;
+        }
+
+        System.out.println("\nLIVROS NO IDIOMA '" + idioma.toUpperCase() + "':\n");
+        livros.forEach(livro -> {
+            System.out.println("""
+                    --------- Livro ----------
+                    Título: %s
+                    Autor: %s
+                    Downloads: %,d
+                    ---------------------------
+                    """.formatted(
+                    livro.getTitle(),
+                    livro.getAuthor().getName(),
+                    livro.getDownloadCount()
+            ));
+        });
+        System.out.println("\nTotal: " + livros.size() + " livros");
+    }
 }

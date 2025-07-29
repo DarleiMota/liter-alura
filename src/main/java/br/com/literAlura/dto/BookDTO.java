@@ -1,7 +1,7 @@
 package br.com.literAlura.dto;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
@@ -9,11 +9,12 @@ import java.util.List;
 public class BookDTO {
 
     private String title;
-
-    @JsonAlias("download_count")
+    @JsonProperty("download_count")
     private Integer downloadCount;
     private List<String> languages;
     private List<AuthorDTO> authors;
+
+    public BookDTO() {}
 
     public String getTitle() {
         return title;

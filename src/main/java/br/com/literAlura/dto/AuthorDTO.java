@@ -1,6 +1,5 @@
 package br.com.literAlura.dto;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -8,12 +7,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class AuthorDTO {
 
     private String name;
-
     @JsonProperty("birth_year")
     private Integer birthYear;
-
     @JsonProperty("death_year")
     private Integer deathYear;
+
+    public AuthorDTO() {}
 
     public String getName() {
         return name;
