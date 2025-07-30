@@ -1,6 +1,5 @@
 package br.com.literAlura.service;
 
-import br.com.literAlura.cliente.GutendexClient;
 import br.com.literAlura.model.Author;
 import br.com.literAlura.model.Book;
 import br.com.literAlura.repository.AuthorRepository;
@@ -16,6 +15,7 @@ public class AuthorService {
         this.authorRepository = authorRepository;
     }
 
+    // Exibir autores formatado
     public void listarAutoresFormatado() {
         List<Author> autores = authorRepository.findAllWithBooks();
 
@@ -46,11 +46,11 @@ public class AuthorService {
         System.out.println("Total: " + autores.size() + " autores");
     }
 
+    //Exibir autores vivos pelo ano fornecido.
     public void listarAutoresVivosPorAno(int ano) {
         List<Author> autores = authorRepository.findAllWithBooks()
                 .stream()
-                .filter(a -> a.getBirthYear() != null &&
-                        a.getBirthYear() <= ano &&
+                .filter(a -> a.getBirthYear() != null && a.getBirthYear() <= ano &&
                         (a.getDeathYear() == null || a.getDeathYear() > ano))
                 .toList();
 
@@ -72,7 +72,8 @@ public class AuthorService {
                     autor.getName(),
                     autor.getBirthYear(),
                     autor.getDeathYear() == null ? "Ainda vivo ou desconhecido" : autor.getDeathYear(),
-                    autor.getBooks().stream()
+                    autor.getBooks()
+                            .stream()
                             .map(Book::getTitle)
                             .reduce("", (acc, title) -> acc + "- " + title + "\n")
             ));

@@ -49,7 +49,7 @@ public class BookService {
                         continue;
                     }
 
-                    // Processa autor
+                    // Adiciona autor
                     AuthorDTO authorDTO = dto.getAuthors().get(0);
                     Author author = authorRepository.findByNameIgnoreCase(authorDTO.getName())
                             .orElseGet(() -> authorRepository.save(
@@ -60,7 +60,7 @@ public class BookService {
                                     )
                             ));
 
-                    // Verifica e ajusta título longo
+                    // Título ajustado (DB e exibição)
                     String tituloOriginal = dto.getTitle().length() > 500 ?
                             dto.getTitle().substring(0, 500) : dto.getTitle();
 
@@ -69,7 +69,8 @@ public class BookService {
 
                     // Verifica resultados duplicados
                     if (bookRepository.existsByTitleIgnoreCaseAndAuthor(tituloOriginal, author)) {
-                        continue;
+                        System.out.println("O Banco já tem o livro: " + tituloOriginal + "\n");
+                        break;
                     }
 
                     // Cria livro e verifica livro
@@ -105,17 +106,22 @@ public class BookService {
         } catch (Exception e) {
             System.out.println("Erro na busca: " + e.getMessage());
         }
+        // Chama para exibir consultas direto do banco
+        exibirLivrosPorTituloSalvos(termo);
     }
 
+    // Busca todos os livros
     public List<Book> listarTodos() {
         return bookRepository.findAll();
     }
 
+    // Busca por ID
     public Book buscarPorId(Long id) {
         return bookRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Livro com ID " + id + " não encontrado"));
     }
 
+    // Exibir livros Formatados
     public void listarLivrosFormatado() {
         List<Book> livros = bookRepository.findAll();
         if (livros.isEmpty()) {
@@ -142,8 +148,10 @@ public class BookService {
             ));
         });
         System.out.println("\n Total: " + livros.size() + " livros");
+
     }
 
+    // Livros por idioma
     public void listarLivrosPorIdioma(String idioma) {
         List<Book> livros = bookRepository.findAll()
                 .stream()
@@ -170,5 +178,34 @@ public class BookService {
             ));
         });
         System.out.println("\nTotal: " + livros.size() + " livros");
+    }
+
+    // Exibir os livros salvos pela pesquisa
+    public void exibirLivrosPorTituloSalvos(String termo) {
+        List<Book> livros = bookRepository.findByTitleContainingIgnoreCase(termo);
+
+        if (livros.isEmpty()) {
+            System.out.println("Nenhum livro encontrado no banco para o termo: '" + termo + "'");
+            return;
+        }
+
+        System.out.println("\n📚 LIVROS JÁ CADASTRADOS COM O TERMO '" + termo + "':");
+        livros.forEach(livro -> {
+            System.out.println("""
+            -------------------------
+            Título: %s
+            Autor: %s (%d - %s)
+            Idioma: %s
+            Downloads: %,d
+            -------------------------
+            """.formatted(
+                    livro.getTitle(),
+                    livro.getAuthor().getName(),
+                    livro.getAuthor().getBirthYear() != null ? livro.getAuthor().getBirthYear() : 0,
+                    livro.getAuthor().getDeathYear() != null ? livro.getAuthor().getDeathYear() : "Presente",
+                    livro.getLanguage(),
+                    livro.getDownloadCount()
+            ));
+        });
     }
 }
