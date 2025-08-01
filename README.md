@@ -39,7 +39,7 @@ Foi desenvolvido utilizando **Spring Boot**, **JPA (Hibernate)**, **PostgreSQL**
 
 ## 🖥️ Demonstração da Aplicação
 
-![Demonstração da aplicação](docs/demo.gif)
+![Demonstração da aplicação](assets/Videoteste.gif)
 
 ---
 

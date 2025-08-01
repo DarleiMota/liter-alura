@@ -33,13 +33,14 @@ public class BookService {
             return;
         }
 
+        boolean houveImportacao = false;
         System.out.println("\nBuscando livros para: '" + termo + "'...\n");
 
         try {
             List<BookDTO> bookDTOs = client.buscarLivros(termo);
 
             if (bookDTOs.isEmpty()) {
-                System.out.println("Nenhum livro encontrado para: '" + termo + "'");
+                System.out.println("Pesquise por uma palavra diferente de: '" + termo + "'");
                 return;
             }
 
@@ -69,7 +70,7 @@ public class BookService {
 
                     // Verifica resultados duplicados
                     if (bookRepository.existsByTitleIgnoreCaseAndAuthor(tituloOriginal, author)) {
-                        System.out.println("O Banco já tem o livro: " + tituloOriginal + "\n");
+                        //System.out.println("O Banco já adicionou a pesquisa para: " + termo + "\n");
                         break;
                     }
 
@@ -82,6 +83,7 @@ public class BookService {
                     );
 
                     bookRepository.save(book);
+                    houveImportacao = true;
 
                     System.out.println("""
                     --------- LIVRO IMPORTADO ----------
@@ -107,7 +109,9 @@ public class BookService {
             System.out.println("Erro na busca: " + e.getMessage());
         }
         // Chama para exibir consultas direto do banco
-        exibirLivrosPorTituloSalvos(termo);
+        if (!houveImportacao) {
+            exibirLivrosPorTituloSalvos(termo);
+        }
     }
 
     // Busca todos os livros
@@ -189,7 +193,7 @@ public class BookService {
             return;
         }
 
-        System.out.println("\n📚 LIVROS JÁ CADASTRADOS COM O TERMO '" + termo + "':");
+        System.out.println("\nLIVROS JÁ CADASTRADOS COM O TERMO '" + termo + "':");
         livros.forEach(livro -> {
             System.out.println("""
             -------------------------
